@@ -1,0 +1,43 @@
+{
+    "name": "fast",
+    "version": "1.0.2",
+    "description": "Develop, build, deploy, redeploy, and teardown frontend projects fast ⚡️",
+    "scripts": {
+        "start": "parcel -p 3000 index.html",
+        "serve": "\"%npm_execpath%\" start --open",
+        "build": "parcel build index.html",
+        "deploy": "\"%npm_execpath%\" build && cd dist && surge",
+        "redeploy": "\"%npm_execpath%\" build && cd dist && surge --domain",
+        "teardown": "surge teardown"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/reblim/fast.git"
+    },
+    "author": "Milber Ferreira",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/reblim/fast/issues"
+    },
+    "homepage": "https://github.com/reblim/fast#readme",
+    "browserslist": [
+        "defaults",
+        "not IE 11",
+        "not IE_Mob 11",
+        "maintained node versions"
+    ],
+    "devDependencies": {
+        "@parcel/transformer-sass": "2.5.0",
+        "autoprefixer": "^10.4.13",
+        "parcel": "^2.4.1",
+        "parcel-plugin-clean-dist": "^0.0.6",
+        "postcss": "^8.4.19",
+        "sass": "^1.49.11",
+        "surge": "^0.23.1"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.2.1",
+        "normalize.css": "^8.0.1",
+        "tailwindcss": "^3.2.4"
+    }
+}

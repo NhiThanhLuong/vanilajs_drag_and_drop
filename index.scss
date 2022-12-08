@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --dark-color: #e5e7eb;
+    --light-color: #000;
+}
+
+body {
+    background: var(--dark-color);
+    color: var(--light-color);
+    font-family: sans-serif;
+
+    section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+    }
+}
+
+.container {
+    margin: auto;
+    margin-top: 42px;
+    user-select: none !important;
+}
+
+.btn {
+    padding: 16px 32px;
+    border-radius: 8px;
+    @apply text-green-700 font-semibold;
+    transition: all 0.3s ease;
+    &:hover {
+        @apply bg-green-800 text-white;
+    }
+    &--active {
+        background: #fff;
+        pointer-events: none;
+    }
+}
+
+.type_quantity {
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.items_container {
+    position: relative;
+    min-height: 75vh;
+}
+
+.list_item {
+    border-right: 40px solid;
+    z-index: 0;
+    @apply w-full my-4 bg-white px-4 py-2 rounded-lg flex justify-between items-center  border-green-800;
+    &.dragging {
+        opacity: 0.3;
+    }
+}
+
+.item_icon_label {
+    @apply flex items-center;
+}
+
+.item_status {
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    border: 1px solid black;
+    margin-right: 8px;
+    &.done {
+        background-color: green;
+    }
+    &.processing {
+        background-color: yellow;
+    }
+}
+
+svg.fa-star {
+    @apply text-yellow-300 mr-4;
+}
+
+.cancel_drag_zone {
+    height: 100px;
+    @apply fixed bottom-0 inset-x-0;
+    &.dragging {
+        @apply bg-red-500;
+    }
+}
