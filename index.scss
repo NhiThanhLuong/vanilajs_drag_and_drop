@@ -55,7 +55,7 @@ body {
 .list_item {
     border-right: 40px solid;
     z-index: 0;
-    @apply w-full my-4 bg-white px-4 py-2 rounded-lg flex justify-between items-center  border-green-800;
+    @apply w-full my-4 bg-white px-4 py-2 rounded-lg flex justify-between items-center  border-green-800 cursor-pointer;
     &.dragging {
         opacity: 0.3;
     }

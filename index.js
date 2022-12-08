@@ -309,15 +309,26 @@ const addEventDragDrop = () => {
     let dropped
     let dragged
     let touchX = 0
+    let touchY = 0
     let isDragging = false
     let dx = 0
+    let dy = 0
     let clone
 
     const handleTouchStart = (e) => {
-        if (!e.target.classList.contains('list_item')) return
+        if (
+            !getParent(e.target, '.list_item') &&
+            !e.target.classList.contains('list_item')
+        )
+            return
         isDragging = true
-        dragged = e.target
+        dragged = e.target.classList.contains('list_item')
+            ? e.target
+            : getParent(e.target, '.list_item')
+        console.log(dragged)
+
         clone = dragged.cloneNode(true)
+        dragged.classList.add('dragging')
         const items_container = getParent(dragged, '.items_container')
         items_container.append(clone)
         dx = e.clientX - dragged.getBoundingClientRect().x / 6
@@ -340,6 +351,7 @@ const addEventDragDrop = () => {
     const handleTouchEnd = (e) => {
         if (isDragging) {
             isDragging = false
+            dragged.classList.remove('dragging')
             if (e.target.classList.contains('cancel_drag_zone')) {
                 dragged = undefined
             } else {
