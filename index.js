@@ -251,6 +251,7 @@ add_item_column('javascript', javascript_node)
 
 $$('.list_item').forEach((item) => {
     appendNode(item, 'div', '', 'item_icons flex')
+    appendNode(item, 'div', '', 'items_drag')
 })
 
 $$('.item_icons').forEach((item) => {
@@ -314,18 +315,15 @@ const addEventDragDrop = () => {
     let dx = 0
     let dy = 0
     let clone
+    let first_item_movedown = null
+    let dragging_items_container
 
     const handleTouchStart = (e) => {
-        if (
-            !getParent(e.target, '.list_item') &&
-            !e.target.classList.contains('list_item')
-        )
-            return
+        if (e.which !== 1 || !e.target.classList.contains('items_drag')) return
         isDragging = true
         dragged = e.target.classList.contains('list_item')
             ? e.target
             : getParent(e.target, '.list_item')
-        console.log(dragged)
 
         clone = dragged.cloneNode(true)
         dragged.classList.add('dragging')
@@ -334,6 +332,8 @@ const addEventDragDrop = () => {
         dx = e.clientX - dragged.getBoundingClientRect().x / 6
         dy = e.clientY - dragged.getBoundingClientRect().y
         clone.style.position = 'absolute'
+        clone.style.left = dragged.getBoundingClientRect().x / 6 + 'px'
+        clone.style.top = dragged.getBoundingClientRect().y - 115 + 'px'
         clone.style.pointerEvents = 'none'
         clone.style.zIndex = 100
         clone.onmouseup = null
@@ -346,32 +346,101 @@ const addEventDragDrop = () => {
         clone.style.left = `${touchX}px`
         clone.style.top = `${touchY}px`
         $('.cancel_drag_zone').classList.add('dragging')
+
+        // Reset position top of all item
+        dragging_items_container = e.target.matches('.items_container')
+            ? e.target
+            : getParent(e.target, '.items_container')
+
+        // if (
+        //     dragging_items_container &&
+        //     dragging_items_container !== getParent(e.target, '.items_container')
+        // ) {
+        //     dragging_items_container.removeAttribute('animate')
+        // }
+
+        $$('.items_container').forEach((item) => {
+            if (item === dragging_items_container)
+                item.setAttribute('animate', true)
+            else {
+                item.removeAttribute('animate')
+            }
+        })
+        $$('.items_container:not([animate]) .list_item').forEach((item) => {
+            if (item !== clone) {
+                item.style.top = null
+            }
+        })
+
+        if (dragging_items_container) {
+            if (
+                dragging_items_container ===
+                getParent(dragged, '.items_container')
+            )
+                return
+
+            first_item_movedown = null
+            dragging_items_container.querySelectorAll('.list_item')
+            dragging_items_container
+                .querySelectorAll('.list_item')
+                .forEach((item) => {
+                    const bounding_item = item.getBoundingClientRect()
+                    if (
+                        e.clientY <
+                        bounding_item.y + bounding_item.height / 2
+                    ) {
+                        first_item_movedown ??= item
+                        item.style.top = `${bounding_item.height}px`
+                    } else {
+                        item.style.top = null
+                    }
+                })
+        }
     }
 
     const handleTouchEnd = (e) => {
+        console.log(e)
         if (isDragging) {
             isDragging = false
             dragged.classList.remove('dragging')
-            if (e.target.classList.contains('cancel_drag_zone')) {
+            breakme: if (
+                e.target.classList.contains('cancel_drag_zone') ||
+                e.which !== 1
+            ) {
                 dragged = undefined
             } else {
-                dropped = e.target.classList.contains('items_container')
-                    ? e.target
-                    : getParent(e.target, '.items_container')
-                dropped.append(dragged)
+                if (e.target.classList.contains('items_container')) {
+                    dropped = e.target
+                } else {
+                    dropped = getParent(e.target, '.items_container')
+                }
+
+                if (!dropped) break breakme
+
+                // Insert item above drop zone
+                if (first_item_movedown) {
+                    if (dropped !== getParent(dragged, '.items_container'))
+                        dropped.insertBefore(dragged, first_item_movedown)
+                    $$('.list_item').forEach((item) => {
+                        item.style.top = null
+                    })
+                } else {
+                    dropped.append(dragged)
+                }
             }
+
             $('.cancel_drag_zone').classList.remove('dragging')
             clone.remove()
             update_status()
         }
     }
 
-    $$('.list_item').forEach((item) => {
+    $$('.items_drag').forEach((item) => {
         item.addEventListener('mousedown', handleTouchStart)
     })
 
-    $('.container').addEventListener('mousemove', handleTouchMove)
-    $('.container').addEventListener('mouseup', handleTouchEnd)
+    addEventListener('mousemove', handleTouchMove)
+    addEventListener('mouseup', handleTouchEnd)
 }
 addEventDragDrop()
 

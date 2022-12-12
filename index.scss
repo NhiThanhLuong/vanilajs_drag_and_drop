@@ -53,11 +53,17 @@ body {
 }
 
 .list_item {
-    border-right: 40px solid;
     z-index: 0;
-    @apply w-full my-4 bg-white px-4 py-2 rounded-lg flex justify-between items-center  border-green-800 cursor-pointer;
+    @apply w-full my-4 bg-white px-4 py-2 rounded-lg flex justify-between items-center cursor-pointer relative overflow-hidden;
     &.dragging {
         opacity: 0.3;
+    }
+    .item_icons {
+        @apply mr-8;
+    }
+
+    .items_drag {
+        @apply absolute inset-y-0 right-0 w-8 bg-green-800;
     }
 }
 
