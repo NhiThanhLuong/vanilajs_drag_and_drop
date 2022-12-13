@@ -26,6 +26,10 @@ body {
     margin: auto;
     margin-top: 42px;
     user-select: none !important;
+
+    .grid_node {
+        margin-bottom: 25vh;
+    }
 }
 
 .btn {
@@ -50,6 +54,7 @@ body {
 .items_container {
     position: relative;
     min-height: 75vh;
+    height: 2000px;
 }
 
 .list_item {

@@ -354,9 +354,11 @@ const addEventDragDrop = () => {
         items_container.append(clone)
         dx = e.clientX
         dy = e.clientY - dragged.getBoundingClientRect().y
+        console.log(dy)
         clone.style.position = 'absolute'
         clone.style.left = 0 + 'px'
-        clone.style.top = dragged.getBoundingClientRect().y - 115 + 'px'
+        clone.style.top =
+            dragged.getBoundingClientRect().y + window.scrollY - 115 + 'px'
         clone.style.transform = 'rotateX(45deg)'
         clone.style.pointerEvents = 'none'
         clone.style.zIndex = 100
@@ -366,7 +368,7 @@ const addEventDragDrop = () => {
     const handleTouchMove = (e) => {
         if (!isDragging) return
         touchX = e.clientX - dx
-        touchY = e.clientY - dy - 115
+        touchY = e.clientY - dy - 115 + window.scrollY
         clone.style.left = `${touchX}px`
         clone.style.top = `${touchY}px`
         $('.cancel_drag_zone').classList.add('dragging')
@@ -437,7 +439,6 @@ const addEventDragDrop = () => {
 
                 // Insert item above drop zone
                 if (first_item_movedown) {
-                    console.log('first')
                     dropped.insertBefore(dragged, first_item_movedown)
                     //     if (dropped !== getParent(dragged, '.items_container')) {
                     //     dropped.insertBefore(dragged, first_item_movedown)
@@ -456,7 +457,7 @@ const addEventDragDrop = () => {
 
             $('.cancel_drag_zone').classList.remove('dragging')
             clone.remove()
-            clone_drop.remove()
+            clone_drop && clone_drop.remove()
             update_status()
         }
     }
@@ -504,8 +505,8 @@ const add_event_slide_delete_item = () => {
         current_item = this
     }
 
-    function handleDelete(e) {
-        current_item.remove()
+    function handleDelete() {
+        getParent(this, '.list_item').remove()
     }
 
     function handleTouchMove(e) {
@@ -523,9 +524,9 @@ const add_event_slide_delete_item = () => {
             current_item.style.display = 'flex'
             current_item.querySelector('.list_item_content').style.width = '80%'
 
-            current_item
-                .querySelector('.btn--delete')
-                .addEventListener('click', handleDelete.bind(current_item))
+            $$('.btn--delete').forEach((item) =>
+                item.addEventListener('click', handleDelete)
+            )
         }
         if (e.movementX > 10) {
             if (current_item.querySelector('.btn--delete')) {
