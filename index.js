@@ -223,33 +223,7 @@ const add_item_column = (type, type_node) => {
         'type_quantity'
     )
 
-    // arr_column.forEach((item, idx) => {
-    //     appendNode(type_node, 'div', `
-    //     <div>
-
-    //     </div>
-    //     `, `${type}__item list_item`)
-    //     appendNode(
-    //         $$(`.${type}__item.list_item`)[idx],
-    //         'div',
-    //         '',
-    //         'item_icon_label'
-    //     )
-    //     appendNode(
-    //         $$(`.${type}__item.list_item .item_icon_label`)[idx],
-    //         'div',
-    //         '',
-    //         `item_status ${item.status}`
-    //     )
-    //     appendNode(
-    //         $$(`.${type}__item.list_item .item_icon_label`)[idx],
-    //         'span',
-    //         item.label,
-    //         'list_item_label'
-    //     )
-    // })
-
-    arr_column.forEach((item, idx) => {
+    arr_column.forEach((item) => {
         appendNode(
             type_node,
             'div',
@@ -270,11 +244,6 @@ const add_item_column = (type, type_node) => {
 add_item_column('html', html_node)
 add_item_column('css', css_node)
 add_item_column('javascript', javascript_node)
-
-// $$('.list_item').forEach((item) => {
-//     appendNode(item, 'div', '', 'item_icons flex')
-//     appendNode(item, 'div', '', 'items_drag')
-// })
 
 $$('.item_icons').forEach((item) => {
     appendNode(item, 'i', '', 'fa-regular fa-star')
@@ -354,7 +323,6 @@ const addEventDragDrop = () => {
         items_container.append(clone)
         dx = e.clientX
         dy = e.clientY - dragged.getBoundingClientRect().y
-        console.log(dy)
         clone.style.position = 'absolute'
         clone.style.left = 0 + 'px'
         clone.style.top =
@@ -391,9 +359,9 @@ const addEventDragDrop = () => {
             }
         })
 
+        clone_drop && clone_drop.remove()
         if (dragging_items_container) {
             first_item_movedown = null
-            clone_drop && clone_drop.remove()
             dragging_items_container
                 .querySelectorAll('.list_item')
                 .forEach((item) => {
@@ -489,7 +457,6 @@ appendNode(
 )
 
 const add_event_slide_delete_item = () => {
-    let item_select
     let isDragging = false
     let current_item
     function handleTouchStart(e) {
@@ -507,6 +474,7 @@ const add_event_slide_delete_item = () => {
 
     function handleDelete() {
         getParent(this, '.list_item').remove()
+        update_status()
     }
 
     function handleTouchMove(e) {
