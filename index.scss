@@ -53,11 +53,21 @@ body {
 }
 
 .list_item {
+    top: 0;
     z-index: 0;
-    @apply w-full my-4 bg-white px-4 py-2 rounded-lg flex justify-between items-center cursor-pointer relative overflow-hidden;
+    @apply w-full my-4 bg-white rounded-lg cursor-pointer relative overflow-hidden;
     &.dragging {
         opacity: 0.3;
     }
+    &_content {
+        transition: width 0.3s ease;
+        @apply flex justify-between items-center relative px-4 py-2 w-full;
+    }
+    .btn--delete {
+        transition: width 0.3s ease;
+        @apply w-1/5 flex justify-center bg-red-600;
+    }
+
     .item_icons {
         @apply mr-8;
     }

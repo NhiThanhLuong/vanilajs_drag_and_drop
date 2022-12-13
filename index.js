@@ -223,25 +223,47 @@ const add_item_column = (type, type_node) => {
         'type_quantity'
     )
 
+    // arr_column.forEach((item, idx) => {
+    //     appendNode(type_node, 'div', `
+    //     <div>
+
+    //     </div>
+    //     `, `${type}__item list_item`)
+    //     appendNode(
+    //         $$(`.${type}__item.list_item`)[idx],
+    //         'div',
+    //         '',
+    //         'item_icon_label'
+    //     )
+    //     appendNode(
+    //         $$(`.${type}__item.list_item .item_icon_label`)[idx],
+    //         'div',
+    //         '',
+    //         `item_status ${item.status}`
+    //     )
+    //     appendNode(
+    //         $$(`.${type}__item.list_item .item_icon_label`)[idx],
+    //         'span',
+    //         item.label,
+    //         'list_item_label'
+    //     )
+    // })
+
     arr_column.forEach((item, idx) => {
-        appendNode(type_node, 'div', '', `${type}__item list_item`)
         appendNode(
-            $$(`.${type}__item.list_item`)[idx],
+            type_node,
             'div',
-            '',
-            'item_icon_label'
-        )
-        appendNode(
-            $$(`.${type}__item.list_item .item_icon_label`)[idx],
-            'div',
-            '',
-            `item_status ${item.status}`
-        )
-        appendNode(
-            $$(`.${type}__item.list_item .item_icon_label`)[idx],
-            'span',
-            item.label,
-            'list_item_label'
+            `
+            <div class="list_item_content">
+                <div class="item_icon_label">
+                    <div class="item_status ${item.status}"></div>
+                    <span class="list_item_label">${item.label}</span>
+                </div>
+                <div class="item_icons flex"></div>
+                <div class="items_drag"></div>
+            </div>
+        `,
+            `${type}__item list_item`
         )
     })
 }
@@ -249,10 +271,10 @@ add_item_column('html', html_node)
 add_item_column('css', css_node)
 add_item_column('javascript', javascript_node)
 
-$$('.list_item').forEach((item) => {
-    appendNode(item, 'div', '', 'item_icons flex')
-    appendNode(item, 'div', '', 'items_drag')
-})
+// $$('.list_item').forEach((item) => {
+//     appendNode(item, 'div', '', 'item_icons flex')
+//     appendNode(item, 'div', '', 'items_drag')
+// })
 
 $$('.item_icons').forEach((item) => {
     appendNode(item, 'i', '', 'fa-regular fa-star')
@@ -315,6 +337,7 @@ const addEventDragDrop = () => {
     let dx = 0
     let dy = 0
     let clone
+    let clone_drop
     let first_item_movedown = null
     let dragging_items_container
 
@@ -329,11 +352,12 @@ const addEventDragDrop = () => {
         dragged.classList.add('dragging')
         const items_container = getParent(dragged, '.items_container')
         items_container.append(clone)
-        dx = e.clientX - dragged.getBoundingClientRect().x / 6
+        dx = e.clientX
         dy = e.clientY - dragged.getBoundingClientRect().y
         clone.style.position = 'absolute'
-        clone.style.left = dragged.getBoundingClientRect().x / 6 + 'px'
+        clone.style.left = 0 + 'px'
         clone.style.top = dragged.getBoundingClientRect().y - 115 + 'px'
+        clone.style.transform = 'rotateX(45deg)'
         clone.style.pointerEvents = 'none'
         clone.style.zIndex = 100
         clone.onmouseup = null
@@ -352,13 +376,6 @@ const addEventDragDrop = () => {
             ? e.target
             : getParent(e.target, '.items_container')
 
-        // if (
-        //     dragging_items_container &&
-        //     dragging_items_container !== getParent(e.target, '.items_container')
-        // ) {
-        //     dragging_items_container.removeAttribute('animate')
-        // }
-
         $$('.items_container').forEach((item) => {
             if (item === dragging_items_container)
                 item.setAttribute('animate', true)
@@ -373,17 +390,12 @@ const addEventDragDrop = () => {
         })
 
         if (dragging_items_container) {
-            if (
-                dragging_items_container ===
-                getParent(dragged, '.items_container')
-            )
-                return
-
             first_item_movedown = null
-            dragging_items_container.querySelectorAll('.list_item')
+            clone_drop && clone_drop.remove()
             dragging_items_container
                 .querySelectorAll('.list_item')
                 .forEach((item) => {
+                    if (item === clone) return
                     const bounding_item = item.getBoundingClientRect()
                     if (
                         e.clientY <
@@ -391,15 +403,21 @@ const addEventDragDrop = () => {
                     ) {
                         first_item_movedown ??= item
                         item.style.top = `${bounding_item.height}px`
+                        item.style.transition = 'top 0.5s ease'
                     } else {
                         item.style.top = null
                     }
                 })
+            // insert clone 2 fake item insert
+            clone_drop = dragged.cloneNode(true)
+            dragging_items_container.insertBefore(
+                clone_drop,
+                first_item_movedown
+            )
         }
     }
 
     const handleTouchEnd = (e) => {
-        console.log(e)
         if (isDragging) {
             isDragging = false
             dragged.classList.remove('dragging')
@@ -419,8 +437,11 @@ const addEventDragDrop = () => {
 
                 // Insert item above drop zone
                 if (first_item_movedown) {
-                    if (dropped !== getParent(dragged, '.items_container'))
-                        dropped.insertBefore(dragged, first_item_movedown)
+                    console.log('first')
+                    dropped.insertBefore(dragged, first_item_movedown)
+                    //     if (dropped !== getParent(dragged, '.items_container')) {
+                    //     dropped.insertBefore(dragged, first_item_movedown)
+                    // }
                     $$('.list_item').forEach((item) => {
                         item.style.top = null
                     })
@@ -428,9 +449,14 @@ const addEventDragDrop = () => {
                     dropped.append(dragged)
                 }
             }
+            // Reset transition all item when mouse up
+            $$('.list_item').forEach((item) => {
+                item.style.transition = null
+            })
 
             $('.cancel_drag_zone').classList.remove('dragging')
             clone.remove()
+            clone_drop.remove()
             update_status()
         }
     }
@@ -460,3 +486,66 @@ appendNode(
 `,
     'cancel_drag_zone'
 )
+
+const add_event_slide_delete_item = () => {
+    let item_select
+    let isDragging = false
+    let current_item
+    function handleTouchStart(e) {
+        if (
+            e.target.matches('.items_drag') ||
+            e.target.matches('button') ||
+            e.target.matches('.btn--delete') ||
+            e.which !== 1
+        )
+            return
+
+        isDragging = true
+        current_item = this
+    }
+
+    function handleDelete(e) {
+        current_item.remove()
+    }
+
+    function handleTouchMove(e) {
+        if (!isDragging) return
+        if (e.movementX < -10) {
+            if (current_item.querySelector('.btn--delete')) return
+            appendNode(
+                current_item,
+                'div',
+                `
+            <button>Delete</button>
+            `,
+                'btn--delete'
+            )
+            current_item.style.display = 'flex'
+            current_item.querySelector('.list_item_content').style.width = '80%'
+
+            current_item
+                .querySelector('.btn--delete')
+                .addEventListener('click', handleDelete.bind(current_item))
+        }
+        if (e.movementX > 10) {
+            if (current_item.querySelector('.btn--delete')) {
+                current_item.querySelector('.list_item_content').style.width =
+                    null
+                current_item.querySelector('.btn--delete').remove(0)
+                return
+            }
+        }
+    }
+
+    function handleTouchUp(e) {
+        if (isDragging) isDragging = false
+    }
+
+    $$('.list_item').forEach((item) => {
+        item.addEventListener('mousedown', handleTouchStart)
+        // item.addEventListener('mousemove', handleTouchMove)
+    })
+    addEventListener('mousemove', handleTouchMove)
+    addEventListener('mouseup', handleTouchUp)
+}
+add_event_slide_delete_item()
