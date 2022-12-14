@@ -365,15 +365,27 @@ const addEventDragDrop = () => {
             dragging_items_container
                 .querySelectorAll('.list_item')
                 .forEach((item) => {
-                    if (item === clone) return
+                    if (
+                        item === clone ||
+                        // dragged and clone side by side
+                        (dragging_items_container.isEqualNode(
+                            getParent(dragged, '.items_container')
+                        ) &&
+                            Math.abs(
+                                dragged.getBoundingClientRect().top - e.clientY
+                            ) <
+                                2 * dragged.getBoundingClientRect().height)
+                    )
+                        return
                     const bounding_item = item.getBoundingClientRect()
+
                     if (
                         e.clientY <
                         bounding_item.y + bounding_item.height / 2
                     ) {
                         first_item_movedown ??= item
                         item.style.top = `${bounding_item.height}px`
-                        item.style.transition = 'top 0.5s ease'
+                        item.style.transition = 'top 0.3s ease'
                     } else {
                         item.style.top = null
                     }
@@ -384,6 +396,14 @@ const addEventDragDrop = () => {
                 clone_drop,
                 first_item_movedown
             )
+            if (first_item_movedown) {
+                clone_drop.style.position = 'absolute'
+                clone_drop.style.top =
+                    first_item_movedown.getBoundingClientRect().top -
+                    4 * first_item_movedown.getBoundingClientRect().height +
+                    window.scrollY +
+                    'px'
+            }
         }
     }
 
@@ -391,10 +411,7 @@ const addEventDragDrop = () => {
         if (isDragging) {
             isDragging = false
             dragged.classList.remove('dragging')
-            breakme: if (
-                e.target.classList.contains('cancel_drag_zone') ||
-                e.which !== 1
-            ) {
+            breakme: if (e.target.classList.contains('cancel_drag_zone')) {
                 dragged = undefined
             } else {
                 if (e.target.classList.contains('items_container')) {
@@ -408,9 +425,6 @@ const addEventDragDrop = () => {
                 // Insert item above drop zone
                 if (first_item_movedown) {
                     dropped.insertBefore(dragged, first_item_movedown)
-                    //     if (dropped !== getParent(dragged, '.items_container')) {
-                    //     dropped.insertBefore(dragged, first_item_movedown)
-                    // }
                     $$('.list_item').forEach((item) => {
                         item.style.top = null
                     })
@@ -434,6 +448,10 @@ const addEventDragDrop = () => {
         item.addEventListener('mousedown', handleTouchStart)
     })
 
+    addEventListener('mousedown', function (e) {
+        if (e.which === 1) return
+        handleTouchEnd(e)
+    })
     addEventListener('mousemove', handleTouchMove)
     addEventListener('mouseup', handleTouchEnd)
 }
@@ -512,7 +530,6 @@ const add_event_slide_delete_item = () => {
 
     $$('.list_item').forEach((item) => {
         item.addEventListener('mousedown', handleTouchStart)
-        // item.addEventListener('mousemove', handleTouchMove)
     })
     addEventListener('mousemove', handleTouchMove)
     addEventListener('mouseup', handleTouchUp)

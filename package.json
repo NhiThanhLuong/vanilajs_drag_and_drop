@@ -3,7 +3,7 @@
     "version": "1.0.2",
     "description": "Develop, build, deploy, redeploy, and teardown frontend projects fast ⚡️",
     "scripts": {
-        "start": "parcel -p 3000 index.html",
+        "start": " parcel -p 3000 index.html",
         "serve": "\"%npm_execpath%\" start --open",
         "build": "parcel build index.html",
         "deploy": "\"%npm_execpath%\" build && cd dist && surge",
@@ -32,6 +32,7 @@
         "parcel": "^2.4.1",
         "parcel-plugin-clean-dist": "^0.0.6",
         "postcss": "^8.4.19",
+        "postcss-modules": "^4.3.0",
         "sass": "^1.49.11",
         "surge": "^0.23.1"
     },
