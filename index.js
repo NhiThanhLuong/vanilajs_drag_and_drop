@@ -365,20 +365,23 @@ const addEventDragDrop = () => {
             dragging_items_container
                 .querySelectorAll('.list_item')
                 .forEach((item) => {
+                    if (item === clone) return
+
+                    // dragged and clone side by side
                     if (
-                        item === clone ||
-                        // dragged and clone side by side
-                        (dragging_items_container.isEqualNode(
+                        dragging_items_container.isEqualNode(
                             getParent(dragged, '.items_container')
                         ) &&
-                            Math.abs(
-                                dragged.getBoundingClientRect().top - e.clientY
-                            ) <
-                                2 * dragged.getBoundingClientRect().height)
-                    )
+                        Math.abs(
+                            dragged.getBoundingClientRect().top - e.clientY
+                        ) <
+                            2 * dragged.getBoundingClientRect().height
+                    ) {
+                        item.style.top = null
                         return
-                    const bounding_item = item.getBoundingClientRect()
+                    }
 
+                    const bounding_item = item.getBoundingClientRect()
                     if (
                         e.clientY <
                         bounding_item.y + bounding_item.height / 2
