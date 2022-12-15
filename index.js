@@ -15,6 +15,18 @@ function getParent(element, selector) {
     }
 }
 
+function getIndexElement(elements, element) {
+    for (let i = 0; i < elements.length; i++) {
+        if (elements[i] === element) return i
+    }
+}
+
+function styleInline(element, object) {
+    Object.keys(object).forEach((item) => {
+        element.style[item] = object[item]
+    })
+}
+
 const data = [
     {
         label: 'Product',
@@ -305,6 +317,7 @@ const addEventDragDrop = () => {
     let isDragging = false
     let dx = 0
     let dy = 0
+    let sideBySide = false
     let clone
     let clone_drop
     let first_item_movedown = null
@@ -323,13 +336,15 @@ const addEventDragDrop = () => {
         items_container.append(clone)
         dx = e.clientX
         dy = e.clientY - dragged.getBoundingClientRect().y
-        clone.style.position = 'absolute'
-        clone.style.left = 0 + 'px'
-        clone.style.top =
-            dragged.getBoundingClientRect().y + window.scrollY - 115 + 'px'
-        clone.style.transform = 'rotateX(45deg)'
-        clone.style.pointerEvents = 'none'
-        clone.style.zIndex = 100
+        styleInline(clone, {
+            position: 'absolute',
+            left: 0 + 'px',
+            top:
+                dragged.getBoundingClientRect().y + window.scrollY - 115 + 'px',
+            transform: 'rotateZ(5deg)',
+            pointerEvents: 'none',
+            zIndex: 100
+        })
         clone.onmouseup = null
     }
 
@@ -337,8 +352,10 @@ const addEventDragDrop = () => {
         if (!isDragging) return
         touchX = e.clientX - dx
         touchY = e.clientY - dy - 115 + window.scrollY
-        clone.style.left = `${touchX}px`
-        clone.style.top = `${touchY}px`
+        styleInline(clone, {
+            left: `${touchX}px`,
+            top: `${touchY}px`
+        })
         $('.cancel_drag_zone').classList.add('dragging')
 
         // Reset position top of all item
@@ -353,6 +370,7 @@ const addEventDragDrop = () => {
                 item.removeAttribute('animate')
             }
         })
+
         $$('.items_container:not([animate]) .list_item').forEach((item) => {
             if (item !== clone) {
                 item.style.top = null
@@ -368,19 +386,23 @@ const addEventDragDrop = () => {
                     if (item === clone) return
 
                     // dragged and clone side by side
+                    const dragged_bounding = dragged?.getBoundingClientRect()
                     if (
                         dragging_items_container.isEqualNode(
                             getParent(dragged, '.items_container')
                         ) &&
-                        Math.abs(
-                            dragged.getBoundingClientRect().top - e.clientY
-                        ) <
-                            2 * dragged.getBoundingClientRect().height
+                        e.clientY - dragged_bounding.top <
+                            2 * dragged_bounding.height &&
+                        e.clientY - dragged_bounding.top >
+                            -1 * dragged_bounding.height
                     ) {
+                        sideBySide = true
                         item.style.top = null
                         return
                     }
 
+                    // item
+                    sideBySide = false
                     const bounding_item = item.getBoundingClientRect()
                     if (
                         e.clientY <
@@ -393,13 +415,27 @@ const addEventDragDrop = () => {
                         item.style.top = null
                     }
                 })
+
             // insert clone 2 fake item insert
             clone_drop = dragged.cloneNode(true)
-            dragging_items_container.insertBefore(
-                clone_drop,
-                first_item_movedown
-            )
+            !sideBySide &&
+                dragging_items_container.insertBefore(
+                    clone_drop,
+                    first_item_movedown
+                )
+
             if (first_item_movedown) {
+                // styleInline(clone_drop, {
+                //     transition: null,
+                //     position: 'absolute',
+                //     top:
+                //         first_item_movedown.getBoundingClientRect().top -
+                //         5.5 *
+                //             first_item_movedown.getBoundingClientRect().height +
+                //         window.scrollY +
+                //         'px'
+                // })
+                clone_drop.style.transition = null
                 clone_drop.style.position = 'absolute'
                 clone_drop.style.top =
                     first_item_movedown.getBoundingClientRect().top -
@@ -411,40 +447,39 @@ const addEventDragDrop = () => {
     }
 
     const handleTouchEnd = (e) => {
-        if (isDragging) {
-            isDragging = false
-            dragged.classList.remove('dragging')
-            breakme: if (e.target.classList.contains('cancel_drag_zone')) {
-                dragged = undefined
+        if (!isDragging) return
+        isDragging = false
+        dragged.classList.remove('dragging')
+        breakme: if (e.target.classList.contains('cancel_drag_zone')) {
+            dragged = undefined
+        } else {
+            if (e.target.classList.contains('items_container')) {
+                dropped = e.target
             } else {
-                if (e.target.classList.contains('items_container')) {
-                    dropped = e.target
-                } else {
-                    dropped = getParent(e.target, '.items_container')
-                }
-
-                if (!dropped) break breakme
-
-                // Insert item above drop zone
-                if (first_item_movedown) {
-                    dropped.insertBefore(dragged, first_item_movedown)
-                    $$('.list_item').forEach((item) => {
-                        item.style.top = null
-                    })
-                } else {
-                    dropped.append(dragged)
-                }
+                dropped = getParent(e.target, '.items_container')
             }
-            // Reset transition all item when mouse up
-            $$('.list_item').forEach((item) => {
-                item.style.transition = null
-            })
 
-            $('.cancel_drag_zone').classList.remove('dragging')
-            clone.remove()
-            clone_drop && clone_drop.remove()
-            update_status()
+            if (!dropped || sideBySide) break breakme
+
+            // Insert item above drop zone
+            if (first_item_movedown) {
+                dropped.insertBefore(dragged, first_item_movedown)
+                $$('.list_item').forEach((item) => {
+                    item.style.top = null
+                })
+            } else {
+                dropped.append(dragged)
+            }
         }
+        // Reset transition all item when mouse up
+        $$('.list_item').forEach((item) => {
+            item.style.transition = null
+        })
+
+        $('.cancel_drag_zone').classList.remove('dragging')
+        clone.remove()
+        clone_drop && clone_drop.remove()
+        update_status()
     }
 
     $$('.items_drag').forEach((item) => {
@@ -493,8 +528,28 @@ const add_event_slide_delete_item = () => {
         current_item = this
     }
 
-    function handleDelete() {
-        getParent(this, '.list_item').remove()
+    async function handleDelete() {
+        const item_delete = getParent(this, '.list_item')
+        const isFirstItem =
+            item_delete ===
+            item_delete.parentElement.querySelector('.list_item')
+        styleInline(item_delete, {
+            maxHeight: '100px',
+            transition: 'all 0.5s ease'
+        })
+
+        setTimeout(() => {
+            styleInline(item_delete, {
+                maxHeight: '0px',
+                opacity: 0,
+                margin: isFirstItem ? '8px 0 -8px 0' : '-8px 0',
+                transform: 'scale(0)'
+            })
+            setTimeout(() => {
+                item_delete.remove()
+            }, 1000)
+        })
+
         update_status()
     }
 
