@@ -206,8 +206,14 @@ const addEventDragDrop = () => {
         })
 
         clone_drop && clone_drop.remove()
-        if (dragging_items_container) {
-            first_item_movedown = null
+        if (!dragging_items_container) return
+        first_item_movedown = null
+
+        if (
+            dragging_items_container.querySelectorAll('.list_item').length === 0
+        ) {
+            sideBySide = false
+        } else
             dragging_items_container
                 .querySelectorAll('.list_item')
                 .forEach((item) => {
@@ -244,33 +250,32 @@ const addEventDragDrop = () => {
                     }
                 })
 
-            // insert clone 2 fake item insert
-            clone_drop = dragged.cloneNode(true)
-            !sideBySide &&
-                dragging_items_container.insertBefore(
-                    clone_drop,
-                    first_item_movedown
-                )
+        // insert clone 2 fake item insert
+        clone_drop = dragged.cloneNode(true)
+        !sideBySide &&
+            dragging_items_container.insertBefore(
+                clone_drop,
+                first_item_movedown
+            )
 
-            if (first_item_movedown) {
-                // styleInline(clone_drop, {
-                //     transition: null,
-                //     position: 'absolute',
-                //     top:
-                //         first_item_movedown.getBoundingClientRect().top -
-                //         5.5 *
-                //             first_item_movedown.getBoundingClientRect().height +
-                //         window.scrollY +
-                //         'px'
-                // })
-                clone_drop.style.transition = null
-                clone_drop.style.position = 'absolute'
-                clone_drop.style.top =
-                    first_item_movedown.getBoundingClientRect().top -
-                    4 * first_item_movedown.getBoundingClientRect().height +
-                    window.scrollY +
-                    'px'
-            }
+        if (first_item_movedown) {
+            // styleInline(clone_drop, {
+            //     transition: null,
+            //     position: 'absolute',
+            //     top:
+            //         first_item_movedown.getBoundingClientRect().top -
+            //         5.5 *
+            //             first_item_movedown.getBoundingClientRect().height +
+            //         window.scrollY +
+            //         'px'
+            // })
+            clone_drop.style.transition = null
+            clone_drop.style.position = 'absolute'
+            clone_drop.style.top =
+                first_item_movedown.getBoundingClientRect().top -
+                4 * first_item_movedown.getBoundingClientRect().height +
+                window.scrollY +
+                'px'
         }
     }
 
