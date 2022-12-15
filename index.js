@@ -1,174 +1,8 @@
 import 'normalize.css'
 import './index.scss'
 import '@fortawesome/fontawesome-free/js/all.js'
-
-function getRandomInt(max) {
-    return Math.floor(Math.random() * max)
-}
-
-function getParent(element, selector) {
-    while (element.parentElement) {
-        if (element.parentElement.matches(selector)) {
-            return element.parentElement
-        }
-        element = element.parentElement
-    }
-}
-
-function getIndexElement(elements, element) {
-    for (let i = 0; i < elements.length; i++) {
-        if (elements[i] === element) return i
-    }
-}
-
-function styleInline(element, object) {
-    Object.keys(object).forEach((item) => {
-        element.style[item] = object[item]
-    })
-}
-
-const data = [
-    {
-        label: 'Product',
-        status: 'done',
-        type: 'html'
-    },
-    {
-        label: 'Features',
-        status: 'done',
-        type: 'html'
-    },
-    {
-        label: 'Security',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'Team',
-        status: 'done',
-        type: 'css'
-    },
-    {
-        label: 'Enterprise',
-        status: 'processing',
-        type: 'css'
-    },
-    {
-        label: 'Customer stories',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'The ReadME Project',
-        status: 'done',
-        type: 'html'
-    },
-    {
-        label: 'Pricing',
-        status: 'new',
-        type: 'javascript'
-    },
-    {
-        label: 'Resources',
-        status: 'processing',
-        type: 'javascript'
-    },
-    {
-        label: 'Roadmap',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'Letter Spacing',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'Line Height',
-        status: 'new',
-        type: 'javascript'
-    },
-    {
-        label: 'List Style Type',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'List Style Position',
-        status: 'new',
-        type: 'css'
-    },
-    {
-        label: 'Text Align',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'Text Color',
-        status: 'processing',
-        type: 'css'
-    },
-    {
-        label: 'Text Decoration',
-        status: 'new',
-        type: 'html'
-    },
-    {
-        label: 'Text Decoration Color',
-        status: 'processing',
-        type: 'html'
-    },
-    {
-        label: 'Text Decoration Style',
-        status: 'done',
-        type: 'css'
-    },
-    {
-        label: 'Text Decoration',
-        status: 'done',
-        type: 'javascript'
-    },
-    {
-        label: 'Text Underline',
-        status: 'new',
-        type: 'javascript'
-    },
-    {
-        label: 'Text Transform',
-        status: 'new',
-        type: 'javascript'
-    },
-    {
-        label: 'Text Overflow',
-        status: 'done',
-        type: 'css'
-    },
-    {
-        label: 'Text Indent',
-        status: 'done',
-        type: 'javascript'
-    },
-    {
-        label: 'Vertical Align',
-        status: 'done',
-        type: 'css'
-    },
-    {
-        label: 'Whitespace',
-        status: 'new',
-        type: 'css'
-    },
-    {
-        label: 'Word Break',
-        status: 'new',
-        type: 'javascript'
-    },
-    {
-        label: 'Content',
-        status: 'new',
-        type: 'javascript'
-    }
-]
+import { getRandomInt, getParent, styleInline, appendNode } from './ultis/func'
+import { DATA } from './ultis/const'
 
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
@@ -176,12 +10,6 @@ const container = $('.container')
 
 let active_index = 0
 
-const appendNode = (parent, tag_name, content, class_name = '') => {
-    const newNode = document.createElement(tag_name)
-    newNode.innerHTML = content
-    if (class_name) newNode.className = class_name
-    parent.append(newNode)
-}
 appendNode(
     container,
     'div',
@@ -224,7 +52,7 @@ const css_node = $('.css')
 const javascript_node = $('.javascript')
 
 const add_item_column = (type, type_node) => {
-    const arr_column = data.filter((item) => item.type === type)
+    const arr_column = DATA.filter((item) => item.type === type)
     const number_done = arr_column.filter(
         (item) => item.status === 'done'
     ).length
@@ -547,10 +375,9 @@ const add_event_slide_delete_item = () => {
             })
             setTimeout(() => {
                 item_delete.remove()
+                update_status()
             }, 1000)
         })
-
-        update_status()
     }
 
     function handleTouchMove(e) {
